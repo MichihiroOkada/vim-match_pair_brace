@@ -16,13 +16,15 @@ let s:else_match = ["^else", "[^a-zA-Z]else\[ \]"]
 let s:case_match = ["^case ", "[^a-zA-Z]case\[ \]"]
 let s:when_match = ["^when ", "[^a-zA-Z]when\[ \]"]
 let s:def_match = ["^def", "[^a-zA-Z]def\[ \]"]
-let s:src_candidate_list = [s:if_match, s:case_match, s:def_match]
+let s:do_match = ["^do", "[^a-zA-Z]do\[ \]", "[^a-zA-Z]do$"]
+let s:begin_match = ["^begin", "[^a-zA-Z]begin\[ \]", "[^a-zA-Z]begin$"]
+let s:src_candidate_list = [s:if_match, s:case_match, s:def_match, s:do_match, s:begin_match]
 
 " target regex
 let s:end_match = ["^end$", "^end ", " end$", " end "] 
 let s:else_match = ["^else$", "^else ", " else$", " else "]
 let s:when_match = ["^when$", "^when ", " when$", " when "]
-let s:end_target_match = [ "[^a-zA-Z]if\[ ({\]", "^if", "^do ", " do ", "^def ", " def ", "^case", " case " ]
+let s:end_target_match = [ "[^a-zA-Z]if\[ ({\]", "^if", "^do ", " do ", "do$", "^def ", " def ", "^case", " case ", "^begin", " begin ", "begin$" ]
 let s:dst_candidate_list = [s:end_match]
 
 let s:blockPair = [ { "src": s:if_match,        "dst": ["elsif ", s:else_match, s:end_match], "direction": 1, "self": 0 },
@@ -31,6 +33,8 @@ let s:blockPair = [ { "src": s:if_match,        "dst": ["elsif ", s:else_match, 
                  \  { "src": s:case_match,      "dst": [s:when_match, s:else_match], "direction": 1, "self": 0 },
                  \  { "src": s:when_match,      "dst": [s:when_match, s:else_match, s:end_match], "direction": 1, "self": 1 },
                  \  { "src": s:def_match,       "dst": [s:end_match],  "direction": 1, "self": 0 },
+                 \  { "src": s:do_match,        "dst": [s:end_match],  "direction": 1, "self": 0 },
+                 \  { "src": s:begin_match,        "dst": [s:end_match],  "direction": 1, "self": 0 },
                  \  { "src": s:end_match,       "dst": [s:end_target_match],  "direction": -1, "self": 0 },
                  \ ]
 
@@ -49,6 +53,7 @@ function! s:search_target(baseline, direction, source, target_list, self)
         "
         for src_list in a:source
             for src in src_list
+                "echo src
                 if a:self == 0 && match(s:searchStr, src) != -1
                     "echo src
                     "echo s:searchStr
